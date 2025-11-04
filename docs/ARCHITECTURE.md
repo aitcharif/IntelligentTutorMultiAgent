@@ -1,266 +1,378 @@
-# Architecture du Système Multi-Agent
+# Architecture du Système Multi-Agent pour l'Enseignement Informatique
 
 ## Vue d'ensemble
 
-IntelligentTutorMultiAgent est un système de tutorat intelligent basé sur une architecture multi-agent utilisant des modèles de langage (LLM). Le système coordonne plusieurs agents spécialisés pour fournir une expérience d'apprentissage personnalisée et adaptative.
+Ce système utilise une architecture multi-agent orchestrée par un coordinateur central pour fournir un enseignement personnalisé d'informatique aux élèves marocains.
 
 ## Composants Principaux
 
-### 1. Core Components (`src/core/`)
+### 1. Coordinateur Central (CoordinatorAgent)
 
-#### Agent Base (`agent.py`)
-- `BaseAgent`: Classe abstraite de base pour tous les agents
-- `AgentRole`: Énumération des rôles possibles (Tuteur, Évaluateur, etc.)
-- `AgentCapability`: Capacités que peuvent posséder les agents
-- `AgentConfig`: Configuration d'un agent
+**Rôle:** Cerveau du système qui orchestre tous les autres agents
 
-#### Message System (`message.py`)
-- `Message`: Structure de message entre agents
-- `MessageType`: Types de messages (Query, Response, Task, Feedback, etc.)
-- Gestion de l'historique et du threading des conversations
+**Responsabilités:**
+- Analyser les requêtes des étudiants
+- Déterminer l'intention (question, exercice, évaluation)
+- Router vers les agents appropriés
+- Combiner les réponses de plusieurs agents
+- Maintenir la cohérence de la conversation
 
-#### Context Management (`context.py`)
-- `ConversationContext`: Contexte d'une session de tutorat
-- `StudentProfile`: Profil de l'étudiant
-- Mémoire partagée entre agents
+**Flow de traitement:**
+```
+Message Étudiant
+    ↓
+Analyse d'intention
+    ↓
+Routage intelligent
+    ↓
+┌───┴───┬────────┬─────────┐
+↓       ↓        ↓         ↓
+Agents spécialisés
+```
 
-### 2. Orchestration Layer (`src/orchestrator/`)
+### 2. Agent Tuteur (TutorAgent)
 
-#### Agent Orchestrator (`orchestrator.py`)
-- Coordonne tous les agents du système
-- Gère les sessions de tutorat
-- Route les messages entre agents
-- Maintient les contextes de conversation
+**Rôle:** Enseignement personnalisé
 
-#### Message Router (`routing.py`)
-- `MessageRouter`: Routage intelligent des messages
-- `RoutingStrategy`: Stratégies de routage
-  - Direct: routage direct à un agent spécifique
-  - Broadcast: diffusion à tous les agents
-  - Capability-based: basé sur les capacités
-  - Role-based: basé sur le rôle
-  - Round-robin: distribution égale
+**Capacités:**
+- Répondre aux questions techniques
+- Adapter les explications au niveau de l'élève
+- Utiliser des exemples du contexte marocain
+- Support multilingue (français/arabe)
 
-### 3. Agent Implementations (`src/agents/`)
+**Prompt System:**
+- Intègre le profil de l'étudiant
+- Adapte au curriculum marocain
+- Utilise le contexte RAG si disponible
 
-#### TutorAgent
-**Rôle**: Agent tuteur principal
-**Capacités**:
-- Répondre aux questions
-- Fournir des explications
-- Adapter le contenu au niveau de l'étudiant
+### 3. Agent Évaluateur (EvaluatorAgent)
 
-#### ExplanationAgent
-**Rôle**: Spécialiste des explications détaillées
-**Capacités**:
-- Explications par concepts
-- Explications étape par étape
-- Explications par analogies
+**Rôle:** Évaluation et feedback
 
-#### EvaluatorAgent
-**Rôle**: Évaluation des réponses
-**Capacités**:
-- Évaluer les réponses des étudiants
-- Fournir des feedbacks constructifs
-- Calculer des scores de compréhension
+**Capacités:**
+- Corriger les solutions des élèves
+- Fournir un feedback constructif
+- Identifier les points forts et faibles
+- Suggérer des améliorations
 
-#### ExerciseGeneratorAgent
-**Rôle**: Génération d'exercices
-**Capacités**:
+**Température LLM:** 0.3 (précision maximale)
+
+### 4. Agent Générateur (GeneratorAgent)
+
+**Rôle:** Création de contenu pédagogique
+
+**Capacités:**
 - Générer des exercices adaptés
 - Créer des quiz
-- Ajuster la difficulté
+- Adapter la difficulté au niveau
+- Respecter le curriculum marocain
 
-### 4. LLM Integration (`src/agents/llm_client.py`)
+**Température LLM:** 0.9 (créativité)
 
-Support pour plusieurs fournisseurs de LLM:
-- **OpenAI**: GPT-4, GPT-3.5
-- **Anthropic**: Claude 3
+### 5. Agent RAG (RAGAgent)
 
-Interface abstraite permettant d'ajouter facilement d'autres fournisseurs.
+**Rôle:** Récupération de connaissances
 
-### 5. Data Models (`src/models/`)
+**Capacités:**
+- Rechercher dans la base de connaissances
+- Embeddings multilingues
+- Recherche sémantique
+- Contexte pertinent pour les autres agents
 
-#### Student Model
-- `Student`: Profil étudiant complet
-- `LearningSession`: Session d'apprentissage
-- `PerformanceMetrics`: Métriques de performance
+## Architecture Technique
 
-### 6. Utilities (`src/utils/`)
+### Stack Backend
 
-- **Configuration**: Gestion de la configuration via `.env`
-- **Logging**: Système de logging avec Loguru
+```
+Python 3.10+
+├── FastAPI (API REST)
+├── Pydantic (Validation)
+├── ChromaDB (Vector Store)
+├── Ollama/OpenAI (LLM)
+└── Loguru (Logging)
+```
+
+### Stack Frontend
+
+```
+HTML5 + CSS3 + Vanilla JS
+├── Interface responsive
+├── Chat en temps réel
+└── Support RTL (arabe)
+```
 
 ## Flux de Données
 
+### 1. Question Simple
+
 ```
-┌─────────────┐
-│   Student   │
-│   Query     │
-└──────┬──────┘
-       │
-       v
-┌─────────────────────┐
-│  Orchestrator       │
-│  - Session Mgmt     │
-│  - Message Routing  │
-└──────┬──────────────┘
-       │
-       v
-┌─────────────────────┐
-│  Message Router     │
-│  - Route Selection  │
-│  - Agent Selection  │
-└──────┬──────────────┘
-       │
-       v
-┌─────────────────────────────────────┐
-│         Active Agents               │
-├────────────┬──────────┬─────────────┤
-│   Tutor   │ Evaluator│  Exercise   │
-│           │          │  Generator  │
-└────────────┴──────────┴─────────────┘
-       │
-       v
-┌─────────────────────┐
-│   LLM Provider      │
-│   (OpenAI/Claude)   │
-└──────┬──────────────┘
-       │
-       v
-┌─────────────────────┐
-│   Response          │
-│   Processing        │
-└──────┬──────────────┘
-       │
-       v
-┌─────────────────────┐
-│   Student           │
-│   Response          │
-└─────────────────────┘
+Étudiant: "Qu'est-ce qu'une variable?"
+    ↓
+Coordinateur (analyse: question)
+    ↓
+RAG Agent (récupère docs pertinents)
+    ↓
+Tutor Agent (génère réponse pédagogique)
+    ↓
+Réponse à l'étudiant
 ```
 
-## Communication Inter-Agent
+### 2. Demande d'Exercices
 
-Les agents communiquent via un système de messages structurés:
+```
+Étudiant: "Donne-moi des exercices sur les listes"
+    ↓
+Coordinateur (analyse: exercise_request)
+    ↓
+Generator Agent (crée exercices adaptés)
+    ↓
+Contexte: marque "awaiting_solution"
+    ↓
+Exercices envoyés à l'étudiant
+```
 
-1. **Message Structure**:
-   - Type (Query, Response, Task, Feedback)
-   - Sender (ID de l'agent émetteur)
-   - Receiver (ID de l'agent destinataire)
-   - Content (Contenu du message)
-   - Metadata (Informations additionnelles)
-   - Timestamp
+### 3. Soumission de Solution
 
-2. **Message Flow**:
-   - Étudiant → Orchestrateur
-   - Orchestrateur → Router
-   - Router → Agent(s) approprié(s)
-   - Agent(s) → LLM
-   - LLM → Agent(s)
-   - Agent(s) → Orchestrateur
-   - Orchestrateur → Étudiant
+```
+Étudiant: "Voici ma solution: [code]"
+    ↓
+Coordinateur (détecte: évaluation)
+    ↓
+Evaluator Agent (évalue le code)
+    ↓
+Contexte: efface "awaiting_solution"
+    ↓
+Feedback constructif à l'étudiant
+```
+
+## Gestion du Contexte
+
+### ConversationContext
+
+```python
+{
+    session_id: str
+    student_profile: StudentProfile
+    history: MessageHistory
+    shared_memory: Dict
+    retrieved_documents: List
+    current_topic: str
+    difficulty_level: str
+}
+```
+
+### StudentProfile
+
+```python
+{
+    student_id: str
+    language: "fr" | "ar" | "en"
+    curriculum_level: "tronc_commun" | "premiere_bac" | "deuxieme_bac"
+    learning_style: str
+    exercises_completed: int
+    average_score: float
+}
+```
+
+## Intégration LLM
+
+### LLM Local (Ollama)
+
+**Avantages:**
+- Gratuit
+- Privé
+- Fonctionne hors ligne
+
+**Modèles recommandés:**
+- Mistral (général)
+- Aya (meilleur pour l'arabe)
+- CodeLlama (programmation)
+
+### LLM Cloud (OpenAI)
+
+**Avantages:**
+- Qualité supérieure
+- Pas de setup local
+
+**Coût:** Variable selon utilisation
+
+## Système RAG
+
+### Pipeline
+
+```
+Question
+    ↓
+Embedding (multilingual-mpnet)
+    ↓
+Recherche ChromaDB (top_k=5)
+    ↓
+Documents pertinents
+    ↓
+Contexte enrichi pour LLM
+```
+
+### Base de Connaissances
+
+```
+data/knowledge_base/
+├── cours/
+│   ├── python_basics.md
+│   ├── algorithms.md
+│   └── data_structures.md
+├── exercises/
+│   ├── beginner/
+│   ├── intermediate/
+│   └── advanced/
+└── curriculum/
+    └── morocco_program.md
+```
+
+## Sécurité et Privacy
+
+1. **Sessions isolées:** Chaque étudiant a sa propre session
+2. **Données locales:** Option LLM local pour privacy totale
+3. **Validation:** Toutes les entrées sont validées (Pydantic)
+4. **Rate limiting:** À implémenter en production
+
+## Scalabilité
+
+### Actuel
+
+- Sessions en mémoire
+- SQLite pour persistance
+- Agents synchrones
+
+### Production
+
+- Redis pour sessions
+- PostgreSQL
+- Agents asynchrones
+- Load balancing
+- Kubernetes
 
 ## Extensibilité
-
-Le système est conçu pour être facilement extensible:
 
 ### Ajouter un Nouvel Agent
 
 ```python
-from src.core.agent import BaseAgent, AgentConfig
+class MyCustomAgent(BaseAgent):
+    def __init__(self, llm_client):
+        super().__init__(
+            agent_id="custom",
+            agent_type=AgentType.CUSTOM,
+            capabilities=[AgentCapability.CUSTOM]
+        )
 
-class CustomAgent(BaseAgent):
     async def process_message(self, message, context):
-        # Implémentation personnalisée
-        pass
+        # Implémentation
 
-    async def execute_task(self, task, context, **kwargs):
-        # Implémentation personnalisée
-        pass
+# Enregistrer
+coordinator.register_agent(MyCustomAgent(llm_client))
 ```
 
-### Ajouter un Nouveau Fournisseur LLM
+### Ajouter une Langue
+
+1. Ajouter la langue dans `supported_languages`
+2. Ajouter les prompts dans chaque agent
+3. Configurer TTS/STT
+4. Mettre à jour le frontend
+
+## Monitoring
+
+### Métriques à Tracker
+
+- Latence des réponses
+- Qualité des réponses (feedback utilisateur)
+- Utilisation par agent
+- Sessions actives
+- Taux d'erreur
+
+### Logs
 
 ```python
-from src.agents.llm_client import LLMClient
-
-class CustomLLMClient(LLMClient):
-    async def generate(self, prompt, system_prompt, **kwargs):
-        # Implémentation personnalisée
-        pass
+# Loguru configuration
+logger.info("Agent processing message")
+logger.error("Error in coordinator")
 ```
 
-### Ajouter une Nouvelle Stratégie de Routage
+## Roadmap
 
-Ajouter dans `routing.py`:
-```python
-class RoutingStrategy(str, Enum):
-    CUSTOM = "custom"
+### Phase 1 (Actuelle)
+- ✅ Architecture multi-agent
+- ✅ Coordinateur central
+- ✅ Support LLM local/cloud
+- ✅ Interface web basique
 
-def _route_custom(self, message):
-    # Implémentation personnalisée
-    pass
-```
+### Phase 2
+- [ ] RAG complet avec ChromaDB
+- [ ] Audio (STT/TTS)
+- [ ] Frontend React avancé
+- [ ] Dashboard de progression
 
-## Configuration
-
-Configuration via fichier `.env`:
-
-```bash
-# LLM API Keys
-OPENAI_API_KEY=your_key
-ANTHROPIC_API_KEY=your_key
-
-# Provider Selection
-LLM_PROVIDER=openai
-DEFAULT_MODEL=gpt-4
-
-# Agent Parameters
-DEFAULT_TEMPERATURE=0.7
-MAX_TOKENS=2000
-
-# Logging
-LOG_LEVEL=INFO
-```
-
-## Sécurité et Considérations
-
-1. **API Keys**: Toujours utiliser des variables d'environnement
-2. **Validation**: Valider toutes les entrées utilisateur
-3. **Rate Limiting**: Implémenter des limites pour les appels LLM
-4. **Privacy**: Anonymiser les données étudiants si nécessaire
-5. **Error Handling**: Gestion robuste des erreurs
+### Phase 3
+- [ ] Mobile app
+- [ ] Gamification
+- [ ] Analytics avancés
+- [ ] Certificats
 
 ## Performance
 
-- Communication asynchrone entre agents
-- Traitement parallèle quand possible
-- Cache des réponses fréquentes (à implémenter)
-- Optimisation des prompts LLM
+### Temps de Réponse Typiques
 
-## Tests
+- Question simple: 2-5s (local), 1-3s (cloud)
+- Génération exercices: 5-10s
+- Évaluation: 3-7s
 
-Structure des tests:
-- `tests/test_agents.py`: Tests des agents
-- `tests/test_orchestrator.py`: Tests de l'orchestrateur
-- `tests/test_routing.py`: Tests du routage
+### Optimisations
 
-Utilisation de pytest avec support asyncio.
+1. Cache des prompts courants
+2. Streaming des réponses
+3. Batch processing
+4. Connection pooling
 
 ## Déploiement
 
-Options de déploiement:
-1. **API REST** (FastAPI): Voir `examples/rest_api.py`
-2. **CLI**: Utilisation directe en ligne de commande
-3. **WebSocket**: Pour interactions temps réel
-4. **Containerization**: Docker (à venir)
+### Development
 
-## Évolutions Futures
+```bash
+python -m api.main
+```
 
-- Support de davantage de LLM providers
-- Système de mémoire à long terme
-- Analytics et métriques avancées
-- Interface web complète
-- Support multilingue avancé
-- Intégration de bases de connaissances externes
+### Production
+
+```bash
+uvicorn backend.api.main:app \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --workers 4
+```
+
+### Docker
+
+```dockerfile
+FROM python:3.10
+COPY backend /app/backend
+RUN pip install -r requirements.txt
+CMD ["uvicorn", "backend.api.main:app"]
+```
+
+## Tests
+
+```bash
+# Unit tests
+pytest backend/tests/
+
+# Integration tests
+pytest backend/tests/integration/
+
+# Load tests
+locust -f load_test.py
+```
+
+## Contribution
+
+Voir CONTRIBUTING.md pour:
+- Standards de code
+- Process de review
+- Guidelines de documentation

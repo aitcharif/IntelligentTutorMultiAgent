@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build: .
+    container_name: moroccan-cs-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - USE_LOCAL_LLM=true
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=mistral
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    volumes:
+      - ./backend:/app/backend
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./.env:/app/.env
+    depends_on:
+      - ollama
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Ollama (Local LLM)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: moroccan-cs-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Frontend (nginx pour servir les fichiers statiques)
+  frontend:
+    image: nginx:alpine
+    container_name: moroccan-cs-frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    networks:
+      - app-network
+    restart: unless-stopped
+
+volumes:
+  ollama-data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge

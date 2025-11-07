@@ -19,6 +19,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # Virtual Environment
 venv/
@@ -32,6 +33,7 @@ ENV/
 *.swp
 *.swo
 *~
+.DS_Store
 
 # Environment variables
 .env
@@ -46,7 +48,28 @@ logs/
 .coverage
 .pytest_cache/
 htmlcov/
+.tox/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/chroma_db/
+
+# Audio files
+*.wav
+*.mp3
+*.ogg
+
+# Temporary files
+*.tmp
+temp/
+tmp/
 
 # OS
-.DS_Store
 Thumbs.db
+.DS_Store
+desktop.ini
+
+# Docker
+.dockerignore

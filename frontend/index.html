@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plateforme d'Enseignement Informatique - Maroc</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .chat-container {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message.user {
+            align-items: flex-end;
+        }
+
+        .message.assistant {
+            align-items: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        #messageInput:focus {
+            border-color: #667eea;
+        }
+
+        #sendButton {
+            margin-left: 10px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        #sendButton:hover {
+            transform: scale(1.05);
+        }
+
+        #sendButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .language-selector {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .lang-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 10px;
+            color: #667eea;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Assistant Informatique Intelligent</h1>
+            <p>Votre professeur personnel d'informatique</p>
+        </div>
+
+        <div class="language-selector">
+            <button class="lang-btn active" data-lang="fr">🇫🇷 Français</button>
+            <button class="lang-btn" data-lang="ar">🇲🇦 العربية</button>
+            <button class="lang-btn" data-lang="en">🇬🇧 English</button>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="message assistant">
+                <div class="message-content">
+                    Bonjour! Je suis votre assistant en informatique. Posez-moi n'importe quelle question sur la programmation, les algorithmes, ou demandez des exercices!
+                </div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <input type="text" id="messageInput" placeholder="Posez votre question...">
+            <button id="sendButton">Envoyer</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let sessionId = null;
+        let currentLanguage = 'fr';
+
+        const chatContainer = document.getElementById('chatContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const langButtons = document.querySelectorAll('.lang-btn');
+
+        // Initialize session
+        async function initSession() {
+            try {
+                const response = await fetch(`${API_URL}/api/sessions`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        student_id: 'web_' + Date.now(),
+                        name: 'Élève',
+                        language: currentLanguage,
+                        curriculum_level: 'tronc_commun'
+                    })
+                });
+                const data = await response.json();
+                sessionId = data.session_id;
+                console.log('Session créée:', sessionId);
+            } catch (error) {
+                console.error('Erreur initialisation:', error);
+                addMessage('Erreur de connexion au serveur. Assurez-vous que le backend est démarré.', 'assistant');
+            }
+        }
+
+        // Send message
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            if (!sessionId) {
+                await initSession();
+            }
+
+            // Add user message
+            addMessage(message, 'user');
+            messageInput.value = '';
+            sendButton.disabled = true;
+
+            // Show loading
+            const loadingId = 'loading-' + Date.now();
+            addMessage('Réflexion en cours...', 'assistant', loadingId);
+
+            try {
+                const response = await fetch(`${API_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        message: message,
+                        language: currentLanguage
+                    })
+                });
+
+                const data = await response.json();
+
+                // Remove loading
+                document.getElementById(loadingId)?.remove();
+
+                if (data.success) {
+                    addMessage(data.response, 'assistant');
+                } else {
+                    addMessage('Erreur: ' + (data.error || 'Réponse non disponible'), 'assistant');
+                }
+            } catch (error) {
+                document.getElementById(loadingId)?.remove();
+                addMessage('Erreur de communication avec le serveur.', 'assistant');
+                console.error('Erreur:', error);
+            }
+
+            sendButton.disabled = false;
+        }
+
+        // Add message to chat
+        function addMessage(text, sender, id = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            if (id) messageDiv.id = id;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Language selection
+        langButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                langButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLanguage = btn.dataset.lang;
+
+                // Update placeholders
+                const placeholders = {
+                    fr: 'Posez votre question...',
+                    ar: 'اطرح سؤالك...',
+                    en: 'Ask your question...'
+                };
+                messageInput.placeholder = placeholders[currentLanguage];
+
+                // Reinit session with new language
+                sessionId = null;
+            });
+        });
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Initialize
+        initSession();
+    </script>
+</body>
+</html>

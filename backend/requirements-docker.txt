@@ -1,0 +1,40 @@
+# Core - FastAPI & Server
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# LLM - Cloud
+openai>=1.10.0
+anthropic>=0.18.0
+
+# LLM - Local (HTTP client only, no compilation needed)
+ollama>=0.1.0
+
+# RAG & Embeddings (lightweight versions)
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.4
+
+# Audio Processing (excluding whisper which needs compilation)
+SpeechRecognition>=3.10.0
+gTTS>=2.5.0
+
+# Database & Storage
+sqlalchemy>=2.0.0
+
+# Utilities
+loguru>=0.7.0
+tenacity>=8.2.0
+aiohttp>=3.9.0
+websockets>=12.0
+
+# Arabic Support
+arabic-reshaper>=3.0.0
+python-bidi>=0.4.2
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+httpx>=0.25.0

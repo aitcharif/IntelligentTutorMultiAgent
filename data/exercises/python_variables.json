@@ -1,0 +1,79 @@
+{
+  "title": "Exercices sur les Variables Python",
+  "level": "tronc_commun",
+  "language": "fr",
+  "exercises": [
+    {
+      "id": "ex1",
+      "title": "Déclaration de variables",
+      "difficulty": "facile",
+      "description": "Créez les variables suivantes:\n- nom: votre nom\n- age: votre âge\n- ville: votre ville\n- est_etudiant: True",
+      "solution": "nom = 'Ahmed'\nage = 16\nville = 'Casablanca'\nest_etudiant = True",
+      "hints": [
+        "Les chaînes de caractères sont entre guillemets",
+        "Les nombres n'ont pas de guillemets",
+        "Les booléens sont True ou False (avec majuscule)"
+      ]
+    },
+    {
+      "id": "ex2",
+      "title": "Calcul de moyenne",
+      "difficulty": "facile",
+      "description": "Calculez la moyenne de trois notes: 15, 17 et 14. Affichez le résultat.",
+      "solution": "note1 = 15\nnote2 = 17\nnote3 = 14\nmoyenne = (note1 + note2 + note3) / 3\nprint(f'Moyenne: {moyenne}')",
+      "hints": [
+        "Utilisez l'opérateur + pour additionner",
+        "Divisez par 3 pour obtenir la moyenne",
+        "Utilisez print() pour afficher"
+      ]
+    },
+    {
+      "id": "ex3",
+      "title": "Conversion de température",
+      "difficulty": "moyen",
+      "description": "Convertissez 30°C en Fahrenheit. Formule: F = (C * 9/5) + 32",
+      "solution": "celsius = 30\nfahrenheit = (celsius * 9/5) + 32\nprint(f'{celsius}°C = {fahrenheit}°F')",
+      "hints": [
+        "Créez une variable celsius = 30",
+        "Appliquez la formule exactement",
+        "Utilisez des parenthèses pour l'ordre des opérations"
+      ]
+    },
+    {
+      "id": "ex4",
+      "title": "Calcul de prix avec TVA",
+      "difficulty": "moyen",
+      "description": "Un produit coûte 100 DH. Calculez le prix TTC avec une TVA de 20%.",
+      "solution": "prix_ht = 100\ntva = 0.20\nprix_ttc = prix_ht * (1 + tva)\nprint(f'Prix TTC: {prix_ttc} DH')",
+      "hints": [
+        "TVA de 20% = 0.20",
+        "Prix TTC = Prix HT × (1 + TVA)",
+        "Ou: Prix TTC = Prix HT + (Prix HT × TVA)"
+      ]
+    },
+    {
+      "id": "ex5",
+      "title": "Manipulation de chaînes",
+      "difficulty": "moyen",
+      "description": "Créez deux variables prenom et nom. Créez une variable nom_complet qui combine les deux avec un espace.",
+      "solution": "prenom = 'Ahmed'\nnom = 'Alami'\nnom_complet = prenom + ' ' + nom\nprint(nom_complet)",
+      "hints": [
+        "Utilisez l'opérateur + pour concaténer",
+        "N'oubliez pas l'espace entre guillemets: ' '",
+        "Ou utilisez f-strings: f'{prenom} {nom}'"
+      ]
+    },
+    {
+      "id": "ex6",
+      "title": "Calcul de distance",
+      "difficulty": "difficile",
+      "description": "Calculez la distance entre Rabat et Casablanca (90 km). Si vous roulez à 120 km/h, combien de temps faut-il? (en heures)",
+      "solution": "distance = 90\nvitesse = 120\ntemps = distance / vitesse\nprint(f'Temps de trajet: {temps} heures')\nprint(f'Soit {temps * 60} minutes')",
+      "hints": [
+        "Temps = Distance ÷ Vitesse",
+        "Le résultat sera en heures",
+        "Pour convertir en minutes: multipliez par 60"
+      ]
+    }
+  ]
+}
